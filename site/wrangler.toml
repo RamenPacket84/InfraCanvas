@@ -1,4 +1,5 @@
-name = "infra-canvas"
+# site/wrangler.toml
+name = 'infracanvas'
 compatibility_date = "2026-07-03"
 
 [assets]

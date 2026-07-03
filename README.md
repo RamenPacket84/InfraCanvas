@@ -4,6 +4,11 @@ InfraCanvas is a native macOS whiteboard app for mapping systems, infrastructure
 
 InfraCanvas is open source under the MIT License.
 
+## Requirements
+
+- macOS 14.0 or later.
+- No separate SF Symbols installation is required. InfraCanvas uses the symbols provided by macOS and automatically falls back to a built-in symbol when a newer symbol is unavailable.
+
 ## Current Phase
 
 - SwiftUI macOS app scaffolded as a Swift Package.

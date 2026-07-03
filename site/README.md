@@ -2,6 +2,8 @@
 
 This folder is a standalone static site draft for a future InfraCanvas-specific website.
 
+Live site: `https://infra-canvas.com`
+
 ## Review Locally
 
 Open `site/index.html` in a browser.

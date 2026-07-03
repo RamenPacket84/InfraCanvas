@@ -4,6 +4,8 @@ This folder is a standalone static site draft for a future InfraCanvas-specific 
 
 Live site: `https://infra-canvas.com`
 
+Deployment branch: `main`
+
 ## Review Locally
 
 Open `site/index.html` in a browser.

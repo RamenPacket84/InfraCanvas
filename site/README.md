@@ -28,6 +28,18 @@ For GitHub-based deployment from this repo:
 
 After the first deployment succeeds, add `infracanvas.com` as a custom domain in the Cloudflare Pages project.
 
+## Cloudflare Workers Static Assets Settings
+
+If Cloudflare creates the project with a required deploy command, use the Workers static assets flow instead:
+
+- Path: `/site`
+- Build command: `exit 0`
+- Deploy command: `npx wrangler deploy`
+- Build token: keep the default Cloudflare-generated token
+- Build variables: none
+
+The `wrangler.toml` file in this folder tells Wrangler to deploy the current folder as static assets.
+
 ## Current Links
 
 - Download: `https://github.com/RamenPacket84/InfraCanvas/releases/download/v0.1.0/InfraCanvas-0.1.0.dmg`

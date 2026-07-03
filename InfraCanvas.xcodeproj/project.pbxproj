@@ -1,0 +1,392 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11A000000000000000000001 /* InfraCanvasApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000001 /* InfraCanvasApp.swift */; };
+		11A000000000000000000002 /* DiagramModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000002 /* DiagramModels.swift */; };
+		11A000000000000000000003 /* BoardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000003 /* BoardStore.swift */; };
+		11A000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000004 /* ContentView.swift */; };
+		11A000000000000000000005 /* InfraToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000005 /* InfraToolbar.swift */; };
+		11A000000000000000000006 /* ComponentPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000006 /* ComponentPaletteView.swift */; };
+		11A000000000000000000007 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000007 /* InspectorView.swift */; };
+		11A000000000000000000008 /* CanvasWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B000000000000000000008 /* CanvasWorkspaceView.swift */; };
+		11A000000000000000000009 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11B00000000000000000000B /* Resources/Assets.xcassets */; };
+		11A00000000000000000000A /* SymbolCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B00000000000000000000C /* SymbolCatalog.swift */; };
+		11A00000000000000000000B /* WindowCloseGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B00000000000000000000E /* WindowCloseGuard.swift */; };
+		11A00000000000000000000C /* ConnectorRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B00000000000000000000F /* ConnectorRouting.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		11B000000000000000000001 /* InfraCanvasApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfraCanvasApp.swift; sourceTree = "<group>"; };
+		11B000000000000000000002 /* DiagramModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModels.swift; sourceTree = "<group>"; };
+		11B000000000000000000003 /* BoardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStore.swift; sourceTree = "<group>"; };
+		11B000000000000000000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		11B000000000000000000005 /* InfraToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfraToolbar.swift; sourceTree = "<group>"; };
+		11B000000000000000000006 /* ComponentPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentPaletteView.swift; sourceTree = "<group>"; };
+		11B000000000000000000007 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		11B000000000000000000008 /* CanvasWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasWorkspaceView.swift; sourceTree = "<group>"; };
+		11B000000000000000000009 /* InfraCanvas.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InfraCanvas.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		11B00000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		11B00000000000000000000B /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		11B00000000000000000000C /* SymbolCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolCatalog.swift; sourceTree = "<group>"; };
+		11B00000000000000000000D /* InfraCanvas.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InfraCanvas.entitlements; sourceTree = "<group>"; };
+		11B00000000000000000000E /* WindowCloseGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCloseGuard.swift; sourceTree = "<group>"; };
+		11B00000000000000000000F /* ConnectorRouting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectorRouting.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		11C000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				11C000000000000000000002 /* Sources/InfraCanvas */,
+				11B00000000000000000000B /* Resources/Assets.xcassets */,
+				11C000000000000000000006 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		11C000000000000000000002 /* Sources/InfraCanvas */ = {
+			isa = PBXGroup;
+			children = (
+				11C000000000000000000003 /* Models */,
+				11C000000000000000000004 /* Stores */,
+				11C000000000000000000005 /* Views */,
+				11C000000000000000000007 /* Resources */,
+				11B000000000000000000001 /* InfraCanvasApp.swift */,
+			);
+			path = Sources/InfraCanvas;
+			sourceTree = "<group>";
+		};
+		11C000000000000000000003 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				11B000000000000000000002 /* DiagramModels.swift */,
+				11B00000000000000000000C /* SymbolCatalog.swift */,
+				11B00000000000000000000F /* ConnectorRouting.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		11C000000000000000000004 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				11B000000000000000000003 /* BoardStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		11C000000000000000000005 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				11B000000000000000000004 /* ContentView.swift */,
+				11B000000000000000000005 /* InfraToolbar.swift */,
+				11B000000000000000000006 /* ComponentPaletteView.swift */,
+				11B000000000000000000007 /* InspectorView.swift */,
+				11B000000000000000000008 /* CanvasWorkspaceView.swift */,
+				11B00000000000000000000E /* WindowCloseGuard.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		11C000000000000000000006 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				11B000000000000000000009 /* InfraCanvas.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		11C000000000000000000007 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				11B00000000000000000000A /* Info.plist */,
+				11B00000000000000000000D /* InfraCanvas.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		11D000000000000000000001 /* InfraCanvas */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11F000000000000000000003 /* Build configuration list for PBXNativeTarget "InfraCanvas" */;
+			buildPhases = (
+				11E000000000000000000001 /* Sources */,
+				11E000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InfraCanvas;
+			productName = InfraCanvas;
+			productReference = 11B000000000000000000009 /* InfraCanvas.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		11E000000000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					11D000000000000000000001 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+				};
+			};
+			buildConfigurationList = 11F000000000000000000001 /* Build configuration list for PBXProject "InfraCanvas" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 11C000000000000000000001;
+			productRefGroup = 11C000000000000000000006 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				11D000000000000000000001 /* InfraCanvas */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		11E000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A000000000000000000009 /* Resources/Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11E000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A000000000000000000001 /* InfraCanvasApp.swift in Sources */,
+				11A000000000000000000002 /* DiagramModels.swift in Sources */,
+				11A000000000000000000003 /* BoardStore.swift in Sources */,
+				11A000000000000000000004 /* ContentView.swift in Sources */,
+				11A000000000000000000005 /* InfraToolbar.swift in Sources */,
+				11A000000000000000000006 /* ComponentPaletteView.swift in Sources */,
+				11A000000000000000000007 /* InspectorView.swift in Sources */,
+				11A000000000000000000008 /* CanvasWorkspaceView.swift in Sources */,
+				11A00000000000000000000A /* SymbolCatalog.swift in Sources */,
+				11A00000000000000000000B /* WindowCloseGuard.swift in Sources */,
+				11A00000000000000000000C /* ConnectorRouting.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		11F000000000000000000004 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		11F000000000000000000005 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		11F000000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Sources/InfraCanvas/Resources/InfraCanvas.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZTVWS9B36C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/InfraCanvas/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewbacon.InfraCanvas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		11F000000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Sources/InfraCanvas/Resources/InfraCanvas.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZTVWS9B36C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/InfraCanvas/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewbacon.InfraCanvas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11F000000000000000000001 /* Build configuration list for PBXProject "InfraCanvas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11F000000000000000000004 /* Debug */,
+				11F000000000000000000005 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		11F000000000000000000003 /* Build configuration list for PBXNativeTarget "InfraCanvas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11F000000000000000000006 /* Debug */,
+				11F000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 11E000000000000000000002 /* Project object */;
+}

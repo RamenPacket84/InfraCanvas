@@ -251,8 +251,8 @@ li {
 .statement p {
   max-width: 68ch;
   color: var(--text);
-  font-size: clamp(1.08rem, 1.7vw, 1.45rem);
-  line-height: 1.55;
+  font-size: clamp(1rem, 1.2vw, 1.16rem);
+  line-height: 1.68;
 }
 
 .content-list {

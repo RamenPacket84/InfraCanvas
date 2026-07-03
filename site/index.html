@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InfraCanvas</title>
+    <meta
+      name="description"
+      content="InfraCanvas is an open-source macOS canvas for mapping infrastructure, networks, systems, and connected ideas."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="InfraCanvas home">
+        <img src="assets/infracanvas-icon.png" alt="" width="48" height="48" />
+        <span>InfraCanvas</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#download">Download</a>
+        <a href="#overview">Overview</a>
+        <a href="#requirements">Requirements</a>
+        <a href="https://github.com/RamenPacket84/InfraCanvas/wiki">Docs</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" id="download">
+        <div class="hero-copy">
+          <p class="label">Open-source macOS diagramming</p>
+          <h1>InfraCanvas</h1>
+          <p class="summary">
+            A local-first Mac app for mapping infrastructure, networks, systems,
+            dependencies, and connected ideas.
+          </p>
+          <div class="actions">
+            <a
+              class="button primary"
+              href="https://github.com/RamenPacket84/InfraCanvas/releases/download/v0.1.0/InfraCanvas-0.1.0.dmg"
+            >
+              Download DMG
+            </a>
+            <a class="button" href="https://github.com/RamenPacket84/InfraCanvas">
+              Source on GitHub
+            </a>
+          </div>
+        </div>
+
+        <dl class="release-card" aria-label="Release details">
+          <div>
+            <dt>Current version</dt>
+            <dd>0.1.0</dd>
+          </div>
+          <div>
+            <dt>Requires</dt>
+            <dd>macOS 14.0+</dd>
+          </div>
+          <div>
+            <dt>License</dt>
+            <dd>MIT</dd>
+          </div>
+          <div>
+            <dt>Distribution</dt>
+            <dd>Developer ID signed and Apple-notarized</dd>
+          </div>
+        </dl>
+      </section>
+
+      <figure class="screenshot">
+        <img
+          src="assets/infracanvas-dark.png"
+          alt="InfraCanvas in dark mode showing an infrastructure diagram with connected components"
+          width="2890"
+          height="1782"
+        />
+      </figure>
+
+      <section class="statement" id="overview">
+        <p>
+          InfraCanvas is built for people who need to reason through systems:
+          platform workflows, network diagrams, cloud services, identity paths,
+          dependencies, handoffs, and the operational details that are easier to
+          understand when the pieces are visible.
+        </p>
+      </section>
+
+      <section class="content-list" aria-label="InfraCanvas capabilities">
+        <article>
+          <p class="label">Canvas</p>
+          <h2>Build system maps quickly.</h2>
+          <p>
+            Add devices, services, networks, identity elements, process blocks,
+            data stores, and notes to a freeform board.
+          </p>
+        </article>
+
+        <article>
+          <p class="label">Connectors</p>
+          <h2>Show the relationships clearly.</h2>
+          <p>
+            Use straight or elbow connectors, labels, arrows, and link types for
+            Ethernet, Wi-Fi, VPN, fiber, power, and dependency paths.
+          </p>
+        </article>
+
+        <article>
+          <p class="label">Files</p>
+          <h2>Keep diagrams local and portable.</h2>
+          <p>
+            Save boards as `.infracanvas` files, then export snapshots as PNG or
+            PDF for tickets, notes, documentation, or review.
+          </p>
+        </article>
+      </section>
+
+      <section class="split-section" id="requirements">
+        <div>
+          <p class="label">Requirements</p>
+          <h2>Built for current Mac releases.</h2>
+        </div>
+        <ul>
+          <li>macOS 14.0 or later</li>
+          <li>No separate SF Symbols installation required</li>
+          <li>Automatic fallback icons when a symbol is unavailable</li>
+          <li>Developer ID signed and Apple-notarized for normal Gatekeeper checks</li>
+          <li>DMG distributed through GitHub Releases</li>
+        </ul>
+      </section>
+
+      <section class="trust-note">
+        <p>
+          The downloadable DMG is signed with an Apple Developer ID certificate
+          and notarized by Apple. That means macOS can verify the release before
+          opening it, while the source remains available for review on GitHub.
+        </p>
+      </section>
+
+      <section class="split-section open-source">
+        <div>
+          <p class="label">Open source</p>
+          <h2>MIT licensed and inspectable.</h2>
+        </div>
+        <div>
+          <p>
+            The source code, release notes, wiki documentation, roadmap, and
+            license are available on GitHub. InfraCanvas is provided “AS IS”,
+            without warranty.
+          </p>
+          <div class="text-links">
+            <a href="https://github.com/RamenPacket84/InfraCanvas">Source code</a>
+            <a href="https://github.com/RamenPacket84/InfraCanvas/wiki">Wiki</a>
+            <a href="https://github.com/RamenPacket84/InfraCanvas/blob/main/LICENSE">MIT License</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a href="https://www.linkedin.com/in/andrew-bacon-fla/">Andrew Bacon</a>
+      <a href="https://github.com/RamenPacket84">GitHub</a>
+      <a href="https://ramenpacket.com">ramenpacket.com</a>
+      <a href="https://github.com/RamenPacket84/InfraCanvas">InfraCanvas</a>
+    </footer>
+  </body>
+</html>

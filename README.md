@@ -60,33 +60,10 @@ xcodebuild -project InfraCanvas.xcodeproj -scheme InfraCanvas -configuration Deb
 
 ## Releases
 
-GitHub Releases are the planned distribution path for downloadable builds.
+Downloadable builds are published through GitHub Releases.
 
-Create a local release DMG:
-
-```sh
-scripts/package_release.sh 0.1.0
-```
-
-The DMG is written to `dist/InfraCanvas-0.1.0.dmg`.
-
-Early builds may be unsigned and not notarized. If a release is unsigned, macOS Gatekeeper may warn before opening the app.
-
-For public releases outside the Mac App Store, use a Developer ID Application certificate and Apple notarization. First, install a `Developer ID Application` certificate in Keychain Access, then store notarization credentials with Xcode's `notarytool`:
-
-```sh
-xcrun notarytool store-credentials InfraCanvasNotary
-```
-
-Then create a signed, notarized DMG:
-
-```sh
-scripts/package_release.sh 0.1.0 \
-  --signing-identity "Developer ID Application: Your Name (TEAMID)" \
-  --notarize
-```
-
-You can also set `DEVELOPER_ID_APPLICATION` and `NOTARYTOOL_PROFILE` environment variables instead of passing those options each time.
+Current public release builds are Developer ID signed and notarized by Apple.
+Maintainer release tooling lives in `scripts/package_release.sh`.
 
 ## Keyboard Shortcuts
 

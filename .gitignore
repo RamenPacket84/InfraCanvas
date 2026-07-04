@@ -19,5 +19,16 @@ dist/
 *.pkg
 *.zip
 
+# Local secrets and signing material
+.env
+.env.*
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+*.key
+*.pem
+
 # Logs
 *.log

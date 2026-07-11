@@ -231,10 +231,16 @@ li {
   font-size: 0.94rem;
 }
 
-.screenshot {
-  margin: 2.5rem 0 0;
+.screenshot-stack {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
   padding-bottom: 2.5rem;
   border-bottom: 1px solid var(--line);
+}
+
+.screenshot {
+  margin: 0;
 }
 
 .screenshot img {

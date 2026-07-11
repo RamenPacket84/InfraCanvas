@@ -107,6 +107,7 @@ Maintainer release tooling lives in `scripts/package_release.sh`.
 - Use the toolbar background button or Canvas menu to switch between grid and solid backgrounds.
 - Use the toolbar or Canvas menu to choose the default connector type before drawing. New connectors use that type and elbow routing by default.
 - Select a connector to edit its label, arrow, label visibility, type, and straight/elbow routing in the inspector.
+- Right-click an elbow connector and choose **Add Bend Here** to take control of its route. Drag the visible bend handle to reposition it, right-click a handle to remove that bend, or choose **Reset to Automatic Route** to return to obstacle-aware routing.
 - Right-click a connector to switch between straight and elbow routing or choose a connector type. Ethernet, Wi-Fi, fiber, VPN, Power / PoE, and dependency connectors use distinct color, width, or dash treatments on the canvas and in exports.
 - Elbow connectors choose source and target edges automatically, route around other components when a clear channel is available, and shift labels away from component collisions.
 

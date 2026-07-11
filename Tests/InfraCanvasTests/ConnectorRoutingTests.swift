@@ -83,6 +83,30 @@ final class ConnectorRoutingTests: XCTestCase {
         XCTAssertNotEqual(labelCenter.y, route.midpoint.y)
     }
 
+    func testManualOrthogonalRouteUsesStoredSidesAndWaypoints() {
+        let source = CGRect(x: 0, y: 0, width: 100, height: 80)
+        let target = CGRect(x: 300, y: 0, width: 100, height: 80)
+        let manualRoute = ManualConnectorRoute(
+            sourceSide: .right,
+            targetSide: .left,
+            waypoints: [DiagramPoint(CGPoint(x: 200, y: 180))]
+        )
+
+        let route = ConnectorRouter.route(
+            style: .orthogonal,
+            sourceRect: source,
+            targetRect: target,
+            obstacleRects: [],
+            manualRoute: manualRoute,
+            options: testOptions
+        )
+
+        XCTAssertEqual(route.start, CGPoint(x: source.maxX, y: source.midY))
+        XCTAssertEqual(route.end, CGPoint(x: target.minX, y: target.midY))
+        XCTAssertTrue(route.points.contains(CGPoint(x: 200, y: 180)))
+        XCTAssertTrue(route.segments.allSatisfy { $0.axis != nil })
+    }
+
     func testDenseUnrelatedObstaclesDoNotMakeDragRoutingExpensive() {
         let obstacles = denseBoardObstacles()
         let startedAt = Date()

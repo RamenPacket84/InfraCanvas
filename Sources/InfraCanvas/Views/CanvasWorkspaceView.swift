@@ -127,6 +127,7 @@ final class InfraCanvasNSView: NSView {
         drawNodes()
         drawEdges()
         drawConnectorEndpointNodes()
+        drawManualRouteHandles()
         drawSelectedGroupBounds()
         drawMarqueeSelection()
         drawMinimap()
@@ -186,6 +187,18 @@ final class InfraCanvasNSView: NSView {
                 id: resizeNode.id,
                 startPoint: location,
                 originalSize: originalSize,
+                hasRegisteredUndo: false
+            )
+            needsDisplay = true
+            return
+        }
+
+        if boardStore.activeTool == .select,
+           let handle = manualWaypointHandle(at: location) {
+            boardStore.selectEdge(handle.edgeID)
+            dragState = .connectorWaypoint(
+                edgeID: handle.edgeID,
+                index: handle.index,
                 hasRegisteredUndo: false
             )
             needsDisplay = true
@@ -268,6 +281,20 @@ final class InfraCanvasNSView: NSView {
                 from: originalSize,
                 byScreenDelta: delta,
                 preserveAspectRatio: preserveAspectRatio,
+                snapToGrid: shouldSnap,
+                registerUndo: false
+            )
+            needsDisplay = true
+        case .connectorWaypoint(let edgeID, let index, let hasRegisteredUndo):
+            if !hasRegisteredUndo {
+                boardStore.beginUndoableAction()
+                dragState = .connectorWaypoint(edgeID: edgeID, index: index, hasRegisteredUndo: true)
+            }
+            let shouldSnap = boardStore.snapToGrid && !event.modifierFlags.contains(.option)
+            boardStore.moveManualWaypoint(
+                for: edgeID,
+                at: index,
+                to: worldPoint(from: location),
                 snapToGrid: shouldSnap,
                 registerUndo: false
             )
@@ -696,6 +723,31 @@ final class InfraCanvasNSView: NSView {
         }
     }
 
+    private func drawManualRouteHandles() {
+        guard let edge = boardStore.selectedEdge,
+              edge.style == .orthogonal,
+              let manualRoute = edge.manualRoute else {
+            return
+        }
+
+        let size = max(10 * boardStore.zoom, 8)
+        for waypoint in manualRoute.waypoints {
+            let center = screenPoint(from: waypoint.point)
+            let rect = CGRect(
+                x: center.x - size / 2,
+                y: center.y - size / 2,
+                width: size,
+                height: size
+            )
+            let path = NSBezierPath(roundedRect: rect, xRadius: 2 * boardStore.zoom, yRadius: 2 * boardStore.zoom)
+            NSColor.controlAccentColor.setFill()
+            path.fill()
+            NSColor.textBackgroundColor.setStroke()
+            path.lineWidth = max(1.5 * boardStore.zoom, 1)
+            path.stroke()
+        }
+    }
+
     private func draw(_ node: DiagramNode) {
         let rect = screenRect(for: node)
         let selected = boardStore.selectedNodeIDs.contains(node.id)
@@ -976,7 +1028,18 @@ final class InfraCanvasNSView: NSView {
             sourceRect: sourceRect,
             targetRect: targetRect,
             obstacleRects: obstacleRects,
+            manualRoute: edge.manualRoute.map(scaledManualRoute),
             options: options
+        )
+    }
+
+    private func scaledManualRoute(_ route: ManualConnectorRoute) -> ManualConnectorRoute {
+        ManualConnectorRoute(
+            sourceSide: route.sourceSide,
+            targetSide: route.targetSide,
+            waypoints: route.waypoints.map { waypoint in
+                DiagramPoint(screenPoint(from: waypoint.point))
+            }
         )
     }
 
@@ -1051,6 +1114,59 @@ final class InfraCanvasNSView: NSView {
         )
     }
 
+    private func screenPoint(from worldPoint: CGPoint) -> CGPoint {
+        CGPoint(
+            x: worldPoint.x * boardStore.zoom + boardStore.viewportOffset.width,
+            y: worldPoint.y * boardStore.zoom + boardStore.viewportOffset.height
+        )
+    }
+
+    private func manualWaypointHandle(at screenPoint: CGPoint) -> (edgeID: DiagramEdge.ID, index: Int)? {
+        guard let edge = boardStore.selectedEdge,
+              edge.style == .orthogonal,
+              let manualRoute = edge.manualRoute else {
+            return nil
+        }
+
+        let hitDistance = max(10 * boardStore.zoom, 8)
+        for (index, waypoint) in manualRoute.waypoints.enumerated() where hypot(
+            screenPoint.x - self.screenPoint(from: waypoint.point).x,
+            screenPoint.y - self.screenPoint(from: waypoint.point).y
+        ) <= hitDistance {
+            return (edge.id, index)
+        }
+
+        return nil
+    }
+
+    private func manualWaypointIndexAtContextPoint(for edge: DiagramEdge) -> Int? {
+        guard let contextCanvasPoint,
+              let manualRoute = edge.manualRoute else {
+            return nil
+        }
+
+        let hitDistance = max(12 * boardStore.zoom, 10)
+        return manualRoute.waypoints.indices.min { first, second in
+            let firstPoint = screenPoint(from: manualRoute.waypoints[first].point)
+            let secondPoint = screenPoint(from: manualRoute.waypoints[second].point)
+            return hypot(contextCanvasPoint.x - firstPoint.x, contextCanvasPoint.y - firstPoint.y)
+                < hypot(contextCanvasPoint.x - secondPoint.x, contextCanvasPoint.y - secondPoint.y)
+        }.flatMap { index in
+            let point = screenPoint(from: manualRoute.waypoints[index].point)
+            return hypot(contextCanvasPoint.x - point.x, contextCanvasPoint.y - point.y) <= hitDistance ? index : nil
+        }
+    }
+
+    private func anchorSide(for point: CGPoint, in rect: CGRect) -> ConnectorAnchorSide {
+        let distances: [(ConnectorAnchorSide, CGFloat)] = [
+            (.left, abs(point.x - rect.minX)),
+            (.right, abs(point.x - rect.maxX)),
+            (.top, abs(point.y - rect.maxY)),
+            (.bottom, abs(point.y - rect.minY))
+        ]
+        return distances.min { $0.1 < $1.1 }?.0 ?? .right
+    }
+
     private func componentMenu(for node: DiagramNode) -> NSMenu {
         let menu = NSMenu()
 
@@ -1115,6 +1231,16 @@ final class InfraCanvasNSView: NSView {
             action: #selector(toggleConnectorStyleFromMenu),
             imageName: edge?.style == .orthogonal ? ConnectorStyle.straight.symbolName : ConnectorStyle.orthogonal.symbolName
         ))
+        if edge?.style == .orthogonal {
+            menu.addItem(.separator())
+            menu.addItem(actionItem("Add Bend Here", action: #selector(addManualBendFromMenu), imageName: "plus"))
+            if let edge, manualWaypointIndexAtContextPoint(for: edge) != nil {
+                menu.addItem(actionItem("Remove Bend", action: #selector(removeManualBendFromMenu), imageName: "minus"))
+            }
+            if edge?.manualRoute != nil {
+                menu.addItem(actionItem("Reset to Automatic Route", action: #selector(resetManualRouteFromMenu), imageName: "arrow.triangle.2.circlepath"))
+            }
+        }
         addConnectorKindItems(to: menu, edge: edge)
         menu.addItem(.separator())
         menu.addItem(actionItem("Delete Connector", action: #selector(deleteFromMenu), imageName: "trash", destructive: true))
@@ -1403,6 +1529,45 @@ final class InfraCanvasNSView: NSView {
         needsDisplay = true
     }
 
+    @objc private func addManualBendFromMenu() {
+        guard let edgeID = contextEdgeID,
+              let edge = boardStore.board.edges.first(where: { $0.id == edgeID }),
+              edge.style == .orthogonal,
+              let location = contextCanvasPoint,
+              let route = connectorPath(for: edge),
+              let source = boardStore.board.nodes.first(where: { $0.id == edge.sourceNodeID }),
+              let target = boardStore.board.nodes.first(where: { $0.id == edge.targetNodeID }) else {
+            return
+        }
+
+        let sourceSide = edge.manualRoute?.sourceSide ?? anchorSide(for: route.start, in: screenRect(for: source))
+        let targetSide = edge.manualRoute?.targetSide ?? anchorSide(for: route.end, in: screenRect(for: target))
+        var manualRoute = edge.manualRoute ?? ManualConnectorRoute(
+            sourceSide: sourceSide,
+            targetSide: targetSide,
+            waypoints: []
+        )
+        manualRoute.waypoints.append(DiagramPoint(worldPoint(from: location)))
+        boardStore.setManualRoute(manualRoute, for: edgeID)
+        needsDisplay = true
+    }
+
+    @objc private func removeManualBendFromMenu() {
+        guard let edgeID = contextEdgeID,
+              let edge = boardStore.board.edges.first(where: { $0.id == edgeID }),
+              let index = manualWaypointIndexAtContextPoint(for: edge) else {
+            return
+        }
+        boardStore.removeManualWaypoint(for: edgeID, at: index)
+        needsDisplay = true
+    }
+
+    @objc private func resetManualRouteFromMenu() {
+        guard let edgeID = contextEdgeID else { return }
+        boardStore.setManualRoute(nil, for: edgeID)
+        needsDisplay = true
+    }
+
     @objc private func groupSelectionFromMenu() {
         boardStore.groupSelectedNodes()
         needsDisplay = true
@@ -1528,6 +1693,7 @@ final class InfraCanvasNSView: NSView {
 private enum DragState {
     case node(id: DiagramNode.ID, startPoint: CGPoint, movingIDs: Set<DiagramNode.ID>, originalPositions: [DiagramNode.ID: CGPoint], hasRegisteredUndo: Bool)
     case resize(id: DiagramNode.ID, startPoint: CGPoint, originalSize: CGSize, hasRegisteredUndo: Bool)
+    case connectorWaypoint(edgeID: DiagramEdge.ID, index: Int, hasRegisteredUndo: Bool)
     case canvas(lastPoint: CGPoint)
     case marquee(origin: CGPoint, current: CGPoint, initialSelection: Set<DiagramNode.ID>)
 }

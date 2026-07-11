@@ -596,6 +596,64 @@ final class BoardStore: ObservableObject {
         updateEdge(at: index, label: label, showsLabel: showsLabel, hasArrow: hasArrow, style: style, kind: kind, registerUndo: true)
     }
 
+    func setManualRoute(_ route: ManualConnectorRoute?, for edgeID: DiagramEdge.ID, registerUndo: Bool = true) {
+        guard let index = board.edges.firstIndex(where: { $0.id == edgeID }),
+              board.edges[index].manualRoute != route else {
+            return
+        }
+
+        if registerUndo {
+            registerUndoSnapshot()
+        }
+        board.edges[index].manualRoute = route
+        markDirty()
+    }
+
+    func moveManualWaypoint(
+        for edgeID: DiagramEdge.ID,
+        at index: Int,
+        to point: CGPoint,
+        snapToGrid shouldSnap: Bool,
+        registerUndo: Bool = true
+    ) {
+        guard let edgeIndex = board.edges.firstIndex(where: { $0.id == edgeID }),
+              var route = board.edges[edgeIndex].manualRoute,
+              route.waypoints.indices.contains(index) else {
+            return
+        }
+
+        let adjustedPoint: CGPoint
+        if shouldSnap {
+            adjustedPoint = CGPoint(
+                x: (point.x / gridSize).rounded() * gridSize,
+                y: (point.y / gridSize).rounded() * gridSize
+            )
+        } else {
+            adjustedPoint = point
+        }
+        guard route.waypoints[index].point != adjustedPoint else { return }
+
+        if registerUndo {
+            registerUndoSnapshot()
+        }
+        route.waypoints[index] = DiagramPoint(adjustedPoint)
+        board.edges[edgeIndex].manualRoute = route
+        markDirty()
+    }
+
+    func removeManualWaypoint(for edgeID: DiagramEdge.ID, at index: Int) {
+        guard let edgeIndex = board.edges.firstIndex(where: { $0.id == edgeID }),
+              var route = board.edges[edgeIndex].manualRoute,
+              route.waypoints.indices.contains(index) else {
+            return
+        }
+
+        registerUndoSnapshot()
+        route.waypoints.remove(at: index)
+        board.edges[edgeIndex].manualRoute = route.waypoints.isEmpty ? nil : route
+        markDirty()
+    }
+
     func updateSelectedGroup(name: String) {
         guard let selectedGroupID else { return }
         updateGroup(selectedGroupID, name: name)
@@ -1239,7 +1297,16 @@ final class BoardStore: ObservableObject {
 
         let pastedEdges = payload.edges.compactMap { edge -> DiagramEdge? in
             guard let sourceID = idMap[edge.sourceNodeID], let targetID = idMap[edge.targetNodeID] else { return nil }
-            return DiagramEdge(sourceNodeID: sourceID, targetNodeID: targetID, label: edge.label, showsLabel: edge.showsLabel, hasArrow: edge.hasArrow, style: edge.style, kind: edge.kind)
+            return DiagramEdge(
+                sourceNodeID: sourceID,
+                targetNodeID: targetID,
+                label: edge.label,
+                showsLabel: edge.showsLabel,
+                hasArrow: edge.hasArrow,
+                style: edge.style,
+                kind: edge.kind,
+                manualRoute: translatedManualRoute(edge.manualRoute, by: offset)
+            )
         }
 
         let pastedGroups = payload.groups.compactMap { group -> DiagramGroup? in
@@ -1297,7 +1364,16 @@ final class BoardStore: ObservableObject {
 
         let duplicatedEdges = board.edges.compactMap { edge -> DiagramEdge? in
             guard let sourceID = idMap[edge.sourceNodeID], let targetID = idMap[edge.targetNodeID] else { return nil }
-            return DiagramEdge(sourceNodeID: sourceID, targetNodeID: targetID, label: edge.label, showsLabel: edge.showsLabel, hasArrow: edge.hasArrow, style: edge.style, kind: edge.kind)
+            return DiagramEdge(
+                sourceNodeID: sourceID,
+                targetNodeID: targetID,
+                label: edge.label,
+                showsLabel: edge.showsLabel,
+                hasArrow: edge.hasArrow,
+                style: edge.style,
+                kind: edge.kind,
+                manualRoute: translatedManualRoute(edge.manualRoute, by: CGSize(width: offset, height: offset))
+            )
         }
 
         board.nodes.append(contentsOf: duplicatedNodes)
@@ -1326,6 +1402,18 @@ final class BoardStore: ObservableObject {
             index += 1
         }
         return "\(candidate) \(index)"
+    }
+
+    private func translatedManualRoute(_ route: ManualConnectorRoute?, by offset: CGSize) -> ManualConnectorRoute? {
+        route.map { route in
+            ManualConnectorRoute(
+                sourceSide: route.sourceSide,
+                targetSide: route.targetSide,
+                waypoints: route.waypoints.map { point in
+                    DiagramPoint(CGPoint(x: point.x + offset.width, y: point.y + offset.height))
+                }
+            )
+        }
     }
 
     func confirmDiscardingUnsavedChangesIfNeeded() -> Bool {
@@ -1439,6 +1527,12 @@ struct BoardExportRenderer {
 
         for node in board.nodes.dropFirst() {
             bounds = bounds.union(node.worldRect)
+        }
+
+        for route in board.edges.compactMap(\.manualRoute) {
+            for waypoint in route.waypoints {
+                bounds = bounds.union(CGRect(x: waypoint.x, y: waypoint.y, width: 1, height: 1))
+            }
         }
 
         return bounds
@@ -1802,7 +1896,18 @@ struct BoardExportRenderer {
             style: edge.style,
             sourceRect: sourceRect,
             targetRect: targetRect,
-            obstacleRects: obstacleRects
+            obstacleRects: obstacleRects,
+            manualRoute: edge.manualRoute.map { translatedManualRoute($0, by: offset) }
+        )
+    }
+
+    private func translatedManualRoute(_ route: ManualConnectorRoute, by offset: CGSize) -> ManualConnectorRoute {
+        ManualConnectorRoute(
+            sourceSide: route.sourceSide,
+            targetSide: route.targetSide,
+            waypoints: route.waypoints.map { point in
+                DiagramPoint(CGPoint(x: point.x + offset.width, y: point.y + offset.height))
+            }
         )
     }
 

@@ -98,8 +98,18 @@ enum ConnectorRouter {
         sourceRect: CGRect,
         targetRect: CGRect,
         obstacleRects: [CGRect],
+        manualRoute: ManualConnectorRoute? = nil,
         options: ConnectorRoutingOptions = ConnectorRoutingOptions()
     ) -> ConnectorRoute {
+        if style == .orthogonal, let manualRoute, !manualRoute.waypoints.isEmpty {
+            return manualOrthogonalRoute(
+                from: sourceRect,
+                to: targetRect,
+                manualRoute: manualRoute,
+                options: options
+            )
+        }
+
         let obstacles = inflatedObstacles(from: obstacleRects, options: options)
 
         switch style {
@@ -212,6 +222,109 @@ enum ConnectorRouter {
         }
 
         return fallbackOrthogonalRoute(from: sourceRect, to: targetRect)
+    }
+
+    private static func manualOrthogonalRoute(
+        from sourceRect: CGRect,
+        to targetRect: CGRect,
+        manualRoute: ManualConnectorRoute,
+        options: ConnectorRoutingOptions
+    ) -> ConnectorRoute {
+        let sourceSide = ConnectorSide(manualRoute.sourceSide)
+        let targetSide = ConnectorSide(manualRoute.targetSide)
+        let start = sourceSide.anchor(in: sourceRect)
+        let end = targetSide.anchor(in: targetRect)
+        let startPort = start.offset(by: sourceSide.direction, distance: options.endpointLead)
+        let endPort = end.offset(by: targetSide.direction, distance: options.endpointLead)
+        let waypoints = manualRoute.waypoints.map(\.point)
+
+        var points: [CGPoint] = [start, startPort]
+        appendBridge(
+            from: startPort,
+            to: waypoints[0],
+            leavingAlong: sourceSide.axis,
+            into: &points
+        )
+
+        for waypoint in waypoints.dropFirst() {
+            appendBridge(from: points.last ?? startPort, to: waypoint, into: &points)
+        }
+
+        appendBridge(
+            from: points.last ?? startPort,
+            to: endPort,
+            arrivingAlong: targetSide.axis,
+            into: &points
+        )
+        points.append(end)
+
+        return ConnectorRoute(points: compacted(points))
+    }
+
+    private static func appendBridge(
+        from origin: CGPoint,
+        to destination: CGPoint,
+        leavingAlong axis: ConnectorAxis? = nil,
+        arrivingAlong arrivingAxis: ConnectorAxis? = nil,
+        into points: inout [CGPoint]
+    ) {
+        guard origin != destination else { return }
+
+        if let axis {
+            let isAlreadyAligned = axis == .horizontal
+                ? origin.y == destination.y
+                : origin.x == destination.x
+            if isAlreadyAligned {
+                points.append(destination)
+                return
+            }
+
+            let corner = axis == .horizontal
+                ? CGPoint(x: destination.x, y: origin.y)
+                : CGPoint(x: origin.x, y: destination.y)
+            points.append(corner)
+            points.append(destination)
+            return
+        }
+
+        if let arrivingAxis {
+            let isAlreadyAligned = arrivingAxis == .horizontal
+                ? origin.y == destination.y
+                : origin.x == destination.x
+            if isAlreadyAligned {
+                points.append(destination)
+                return
+            }
+
+            switch arrivingAxis {
+            case .horizontal:
+                let channelX = (origin.x + destination.x) / 2
+                points.append(CGPoint(x: channelX, y: origin.y))
+                points.append(CGPoint(x: channelX, y: destination.y))
+            case .vertical:
+                let channelY = (origin.y + destination.y) / 2
+                points.append(CGPoint(x: origin.x, y: channelY))
+                points.append(CGPoint(x: destination.x, y: channelY))
+            case .none:
+                break
+            }
+            points.append(destination)
+            return
+        }
+
+        if origin.x == destination.x || origin.y == destination.y {
+            points.append(destination)
+            return
+        }
+
+        let corner: CGPoint
+        let horizontalFirst = abs(destination.x - origin.x) >= abs(destination.y - origin.y)
+        corner = horizontalFirst
+            ? CGPoint(x: destination.x, y: origin.y)
+            : CGPoint(x: origin.x, y: destination.y)
+
+        points.append(corner)
+        points.append(destination)
     }
 
     private static func gridRoute(
@@ -572,7 +685,10 @@ enum ConnectorRouter {
 
             if result.count >= 2 {
                 let beforePrevious = result[result.count - 2]
-                if axis(from: beforePrevious, to: previous) == axis(from: previous, to: point) {
+                let firstSegment = CGVector(dx: previous.x - beforePrevious.x, dy: previous.y - beforePrevious.y)
+                let secondSegment = CGVector(dx: point.x - previous.x, dy: point.y - previous.y)
+                let continuesInSameDirection = firstSegment.dx * secondSegment.dx + firstSegment.dy * secondSegment.dy > 0
+                if axis(from: beforePrevious, to: previous) == axis(from: previous, to: point), continuesInSameDirection {
                     result[result.count - 1] = point
                     return
                 }
@@ -620,6 +736,22 @@ private enum ConnectorSide: CaseIterable {
     case right
     case top
     case bottom
+
+    init(_ side: ConnectorAnchorSide) {
+        switch side {
+        case .left: self = .left
+        case .right: self = .right
+        case .top: self = .top
+        case .bottom: self = .bottom
+        }
+    }
+
+    var axis: ConnectorAxis {
+        switch self {
+        case .left, .right: .horizontal
+        case .top, .bottom: .vertical
+        }
+    }
 
     var direction: CGVector {
         switch self {

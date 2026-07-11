@@ -160,6 +160,7 @@ struct DiagramEdge: Identifiable, Equatable, Codable {
     var hasArrow = true
     var style: ConnectorStyle = .straight
     var kind: ConnectorKind = .generic
+    var manualRoute: ManualConnectorRoute?
 
     init(
         id: UUID = UUID(),
@@ -169,7 +170,8 @@ struct DiagramEdge: Identifiable, Equatable, Codable {
         showsLabel: Bool = true,
         hasArrow: Bool = true,
         style: ConnectorStyle = .straight,
-        kind: ConnectorKind = .generic
+        kind: ConnectorKind = .generic,
+        manualRoute: ManualConnectorRoute? = nil
     ) {
         self.id = id
         self.sourceNodeID = sourceNodeID
@@ -179,6 +181,7 @@ struct DiagramEdge: Identifiable, Equatable, Codable {
         self.hasArrow = hasArrow
         self.style = style
         self.kind = kind
+        self.manualRoute = manualRoute
     }
 
     enum CodingKeys: String, CodingKey {
@@ -190,6 +193,7 @@ struct DiagramEdge: Identifiable, Equatable, Codable {
         case hasArrow
         case style
         case kind
+        case manualRoute
     }
 
     init(from decoder: Decoder) throws {
@@ -202,7 +206,35 @@ struct DiagramEdge: Identifiable, Equatable, Codable {
         hasArrow = try container.decodeIfPresent(Bool.self, forKey: .hasArrow) ?? true
         style = try container.decodeIfPresent(ConnectorStyle.self, forKey: .style) ?? .straight
         kind = try container.decodeIfPresent(ConnectorKind.self, forKey: .kind) ?? .generic
+        manualRoute = try container.decodeIfPresent(ManualConnectorRoute.self, forKey: .manualRoute)
     }
+}
+
+struct DiagramPoint: Equatable, Codable {
+    var x: Double
+    var y: Double
+
+    init(_ point: CGPoint) {
+        x = point.x
+        y = point.y
+    }
+
+    var point: CGPoint {
+        CGPoint(x: x, y: y)
+    }
+}
+
+enum ConnectorAnchorSide: String, CaseIterable, Codable {
+    case left
+    case right
+    case top
+    case bottom
+}
+
+struct ManualConnectorRoute: Equatable, Codable {
+    var sourceSide: ConnectorAnchorSide
+    var targetSide: ConnectorAnchorSide
+    var waypoints: [DiagramPoint]
 }
 
 enum ConnectorStyle: String, CaseIterable, Identifiable, Codable {
@@ -607,7 +639,7 @@ struct ComponentTemplate: Identifiable, Equatable {
 }
 
 struct BoardDocument: Equatable, Codable {
-    static let currentSchemaVersion = 5
+    static let currentSchemaVersion = 6
 
     var schemaVersion = BoardDocument.currentSchemaVersion
     var board: Board

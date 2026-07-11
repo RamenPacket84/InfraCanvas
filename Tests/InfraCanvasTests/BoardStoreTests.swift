@@ -653,6 +653,27 @@ final class BoardStoreTests: XCTestCase {
         XCTAssertTrue(store.isDirty)
     }
 
+    func testMovingManualConnectorWaypointSupportsUndo() {
+        let source = testNode(title: "Source")
+        let target = testNode(title: "Target", x: 220)
+        let route = ManualConnectorRoute(
+            sourceSide: .right,
+            targetSide: .left,
+            waypoints: [DiagramPoint(CGPoint(x: 160, y: 160))]
+        )
+        let edge = DiagramEdge(sourceNodeID: source.id, targetNodeID: target.id, label: "routes", style: .orthogonal, manualRoute: route)
+        let store = BoardStore(board: Board(name: "Test", nodes: [source, target], edges: [edge]))
+
+        store.moveManualWaypoint(for: edge.id, at: 0, to: CGPoint(x: 208, y: 190), snapToGrid: true)
+
+        XCTAssertEqual(store.board.edges[0].manualRoute?.waypoints[0].point, CGPoint(x: 224, y: 192))
+        XCTAssertTrue(store.isDirty)
+
+        store.undo()
+
+        XCTAssertEqual(store.board.edges[0].manualRoute, route)
+    }
+
     func testStartConnectionFromNodeArmsConnectTool() {
         let node = testNode(title: "Source")
         let store = BoardStore(board: Board(name: "Test", nodes: [node], edges: []))
@@ -950,6 +971,29 @@ final class BoardStoreTests: XCTestCase {
         try loadedStore.load(from: url)
 
         XCTAssertEqual(loadedStore.board.edges.first?.showsLabel, false)
+        XCTAssertEqual(loadedStore.board, board)
+    }
+
+    func testSavingAndLoadingManualConnectorRoute() throws {
+        let source = testNode(title: "Source")
+        let target = testNode(title: "Target", x: 220)
+        let route = ManualConnectorRoute(
+            sourceSide: .right,
+            targetSide: .left,
+            waypoints: [DiagramPoint(CGPoint(x: 160, y: 160))]
+        )
+        let edge = DiagramEdge(sourceNodeID: source.id, targetNodeID: target.id, label: "routes", style: .orthogonal, manualRoute: route)
+        let board = Board(name: "Saved Manual Route", nodes: [source, target], edges: [edge])
+        let store = BoardStore(board: board)
+        let url = temporaryBoardURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        try store.save(to: url)
+
+        let loadedStore = BoardStore(board: .blank)
+        try loadedStore.load(from: url)
+
+        XCTAssertEqual(loadedStore.board.edges.first?.manualRoute, route)
         XCTAssertEqual(loadedStore.board, board)
     }
 

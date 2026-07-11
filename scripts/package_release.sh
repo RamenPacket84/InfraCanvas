@@ -9,7 +9,7 @@ DERIVED_DATA_PATH="$ROOT_DIR/.build/XcodeDerivedData"
 DIST_DIR="$ROOT_DIR/dist"
 APP_PATH="$DERIVED_DATA_PATH/Build/Products/$CONFIGURATION/$APP_NAME.app"
 DMG_STAGING="$DIST_DIR/dmg-staging"
-VERSION="${1:-0.1.0}"
+VERSION="${1:-0.2.0}"
 DMG_PATH="$DIST_DIR/$APP_NAME-$VERSION.dmg"
 SIGNING_IDENTITY="${DEVELOPER_ID_APPLICATION:-}"
 NOTARY_PROFILE="${NOTARYTOOL_PROFILE:-InfraCanvasNotary}"
@@ -28,8 +28,8 @@ Options:
   -h, --help                Show this help.
 
 Examples:
-  scripts/package_release.sh 0.1.0
-  scripts/package_release.sh 0.1.0 \\
+  scripts/package_release.sh 0.2.0
+  scripts/package_release.sh 0.2.0 \\
     --signing-identity "Developer ID Application: Your Name (TEAMID)" \\
     --notarize
 USAGE

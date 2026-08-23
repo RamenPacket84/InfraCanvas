@@ -116,13 +116,70 @@ enum ConnectorRouter {
         case .straight:
             return straightRoute(from: sourceRect, to: targetRect)
         case .orthogonal:
-            let nearbyObstacles = relevantObstacles(from: obstacles, sourceRect: sourceRect, targetRect: targetRect, options: options)
+            let nearbyObstacles = relevantObstacles(
+                from: obstacles,
+                sourceRect: sourceRect,
+                targetRect: targetRect,
+                options: options
+            )
             let simpleRoute = fallbackOrthogonalRoute(from: sourceRect, to: targetRect)
             if routeIsClear(simpleRoute, avoiding: nearbyObstacles) {
                 return simpleRoute
             }
 
-            return orthogonalRoute(from: sourceRect, to: targetRect, avoiding: nearbyObstacles, options: options)
+            let initialObstacles = prioritizedObstacles(
+                nearbyObstacles,
+                sourceRect: sourceRect,
+                targetRect: targetRect,
+                limit: options.maximumObstacleCount
+            )
+
+            if let initialRoute = orthogonalRoute(
+                from: sourceRect,
+                to: targetRect,
+                avoiding: initialObstacles,
+                options: options
+            ) {
+                if routeIsClear(initialRoute, avoiding: nearbyObstacles) {
+                    return initialRoute
+                }
+
+                if let perimeterRoute = perimeterOrthogonalRoute(
+                    from: sourceRect,
+                    to: targetRect,
+                    avoiding: nearbyObstacles,
+                    options: options
+                ) {
+                    return perimeterRoute
+                }
+
+                let intersectingObstacles = nearbyObstacles.filter { obstacle in
+                    !routeIsClear(initialRoute, avoiding: [obstacle])
+                }
+                let retryObstacles = uniquedRects(initialObstacles + intersectingObstacles)
+
+                if retryObstacles.count < nearbyObstacles.count,
+                   let retryRoute = orthogonalRoute(
+                       from: sourceRect,
+                       to: targetRect,
+                       avoiding: retryObstacles,
+                       options: options
+                   ),
+                   routeIsClear(retryRoute, avoiding: nearbyObstacles) {
+                    return retryRoute
+                }
+            }
+
+            if let completeRoute = orthogonalRoute(
+                from: sourceRect,
+                to: targetRect,
+                avoiding: nearbyObstacles,
+                options: options
+            ) {
+                return completeRoute
+            }
+
+            return fallbackOrthogonalRoute(from: sourceRect, to: targetRect)
         }
     }
 
@@ -183,7 +240,7 @@ enum ConnectorRouter {
         to targetRect: CGRect,
         avoiding obstacles: [CGRect],
         options: ConnectorRoutingOptions
-    ) -> ConnectorRoute {
+    ) -> ConnectorRoute? {
         var bestRoute: ConnectorRoute?
         var bestScore = CGFloat.greatestFiniteMagnitude
 
@@ -217,11 +274,79 @@ enum ConnectorRouter {
             }
         }
 
-        if let bestRoute {
-            return bestRoute
+        return bestRoute
+    }
+
+    private static func perimeterOrthogonalRoute(
+        from sourceRect: CGRect,
+        to targetRect: CGRect,
+        avoiding obstacles: [CGRect],
+        options: ConnectorRoutingOptions
+    ) -> ConnectorRoute? {
+        guard var routingBounds = obstacles.first else { return nil }
+
+        for obstacle in obstacles.dropFirst() {
+            routingBounds = routingBounds.union(obstacle)
         }
 
-        return fallbackOrthogonalRoute(from: sourceRect, to: targetRect)
+        routingBounds = routingBounds.union(sourceRect).union(targetRect)
+        let channelOffset = options.channelPadding + options.obstaclePadding
+        let horizontalChannels = [
+            routingBounds.minY - channelOffset,
+            routingBounds.maxY + channelOffset
+        ]
+        let verticalChannels = [
+            routingBounds.minX - channelOffset,
+            routingBounds.maxX + channelOffset
+        ]
+        var bestRoute: ConnectorRoute?
+        var bestScore = CGFloat.greatestFiniteMagnitude
+
+        for sourceSide in ConnectorSide.allCases {
+            for targetSide in ConnectorSide.allCases {
+                let start = sourceSide.anchor(in: sourceRect)
+                let end = targetSide.anchor(in: targetRect)
+                let startPort = start.offset(by: sourceSide.direction, distance: options.endpointLead)
+                let endPort = end.offset(by: targetSide.direction, distance: options.endpointLead)
+                var candidates: [ConnectorRoute] = horizontalChannels.map { channelY in
+                    ConnectorRoute(points: compacted([
+                        start,
+                        startPort,
+                        CGPoint(x: startPort.x, y: channelY),
+                        CGPoint(x: endPort.x, y: channelY),
+                        endPort,
+                        end
+                    ]))
+                }
+                candidates.append(contentsOf: verticalChannels.map { channelX in
+                    ConnectorRoute(points: compacted([
+                        start,
+                        startPort,
+                        CGPoint(x: channelX, y: startPort.y),
+                        CGPoint(x: channelX, y: endPort.y),
+                        endPort,
+                        end
+                    ]))
+                })
+
+                for route in candidates where routeIsClear(route, avoiding: obstacles) {
+                    let score = routeScore(
+                        route,
+                        sourceRect: sourceRect,
+                        sourceSide: sourceSide,
+                        targetRect: targetRect,
+                        targetSide: targetSide,
+                        options: options
+                    )
+                    if score < bestScore {
+                        bestRoute = route
+                        bestScore = score
+                    }
+                }
+            }
+        }
+
+        return bestRoute
     }
 
     private static func manualOrthogonalRoute(
@@ -525,22 +650,36 @@ enum ConnectorRouter {
         let routeBounds = sourceRect
             .union(targetRect)
             .insetBy(dx: -options.routingBoundsPadding, dy: -options.routingBoundsPadding)
+        return obstacles.filter { $0.intersects(routeBounds) }
+    }
+
+    private static func prioritizedObstacles(
+        _ obstacles: [CGRect],
+        sourceRect: CGRect,
+        targetRect: CGRect,
+        limit: Int
+    ) -> [CGRect] {
+        guard obstacles.count > max(limit, 0) else { return obstacles }
+
         let midpoint = CGPoint(
             x: (sourceRect.icCenter.x + targetRect.icCenter.x) / 2,
             y: (sourceRect.icCenter.y + targetRect.icCenter.y) / 2
         )
-        let nearbyObstacles = obstacles.filter { $0.intersects(routeBounds) }
 
-        guard nearbyObstacles.count > options.maximumObstacleCount else {
-            return nearbyObstacles
-        }
-
-        return nearbyObstacles
+        return obstacles
             .sorted { lhs, rhs in
                 distance(from: lhs.icCenter, to: midpoint) < distance(from: rhs.icCenter, to: midpoint)
             }
-            .prefix(options.maximumObstacleCount)
+            .prefix(max(limit, 0))
             .map { $0 }
+    }
+
+    private static func uniquedRects(_ rects: [CGRect]) -> [CGRect] {
+        rects.reduce(into: [CGRect]()) { result, rect in
+            if !result.contains(rect) {
+                result.append(rect)
+            }
+        }
     }
 
     private static func routeIsClear(_ route: ConnectorRoute, avoiding obstacles: [CGRect]) -> Bool {

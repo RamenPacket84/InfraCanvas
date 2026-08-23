@@ -35,12 +35,14 @@ final class BoardStore: ObservableObject {
     let minimumNodeHeight: Double = 72
 
     private let maximumHistoryDepth = 100
+    private var savedBoardSnapshot: Board
     private var undoStack: [BoardHistoryState] = []
     private var redoStack: [BoardHistoryState] = []
     private var hasPresentedSymbolAvailabilityWarning = false
 
     init(board: Board = .blank) {
         self.board = board
+        savedBoardSnapshot = board
     }
 
     var documentTitle: String {
@@ -971,8 +973,9 @@ final class BoardStore: ObservableObject {
         guard confirmDiscardingUnsavedChangesIfNeeded() else { return }
 
         board = .blank
+        savedBoardSnapshot = board
         fileURL = nil
-        isDirty = false
+        refreshDirtyState()
         clearHistory()
         resetInteractionState()
         resetViewport()
@@ -1061,11 +1064,12 @@ final class BoardStore: ObservableObject {
 
     func save(to url: URL, updatingBoardNameFromURL: Bool = false) throws {
         let targetURL = normalizedDocumentURL(url)
+        var boardToSave = board
         if updatingBoardNameFromURL {
-            board.name = boardName(from: targetURL)
+            boardToSave.name = boardName(from: targetURL)
         }
 
-        let document = BoardDocument(board: board)
+        let document = BoardDocument(board: boardToSave)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
@@ -1074,8 +1078,10 @@ final class BoardStore: ObservableObject {
             try data.write(to: targetURL, options: .atomic)
         }
 
+        board = boardToSave
+        savedBoardSnapshot = boardToSave
         fileURL = targetURL
-        isDirty = false
+        refreshDirtyState()
         lastFileError = nil
     }
 
@@ -1084,10 +1090,17 @@ final class BoardStore: ObservableObject {
             try Data(contentsOf: url)
         }
         let document = try JSONDecoder().decode(BoardDocument.self, from: data)
+        guard document.schemaVersion <= BoardDocument.currentSchemaVersion else {
+            throw BoardDocumentError.unsupportedSchemaVersion(
+                found: document.schemaVersion,
+                supported: BoardDocument.currentSchemaVersion
+            )
+        }
 
         board = document.board
+        savedBoardSnapshot = document.board
         fileURL = url
-        isDirty = false
+        refreshDirtyState()
         lastFileError = nil
         clearHistory()
         resetInteractionState()
@@ -1123,7 +1136,6 @@ final class BoardStore: ObservableObject {
     private func historySnapshot() -> BoardHistoryState {
         BoardHistoryState(
             board: board,
-            isDirty: isDirty,
             selectedNodeID: selectedNodeID,
             selectedNodeIDs: selectedNodeIDs,
             selectedEdgeID: selectedEdgeID,
@@ -1135,13 +1147,13 @@ final class BoardStore: ObservableObject {
 
     private func restore(_ state: BoardHistoryState) {
         board = state.board
-        isDirty = state.isDirty
         selectedNodeID = state.selectedNodeID
         selectedNodeIDs = state.selectedNodeIDs
         selectedEdgeID = state.selectedEdgeID
         selectedGroupID = state.selectedGroupID
         connectionSourceNodeID = state.connectionSourceNodeID
         activeTool = state.activeTool
+        refreshDirtyState()
     }
 
     private func registerUndoSnapshot() {
@@ -1210,7 +1222,11 @@ final class BoardStore: ObservableObject {
     }
 
     private func markDirty() {
-        isDirty = true
+        refreshDirtyState()
+    }
+
+    private func refreshDirtyState() {
+        isDirty = board != savedBoardSnapshot
     }
 
     private func resetInteractionState() {
@@ -1476,7 +1492,6 @@ private struct InfraCanvasClipboardPayload: Codable {
 
 private struct BoardHistoryState: Equatable {
     var board: Board
-    var isDirty: Bool
     var selectedNodeID: DiagramNode.ID?
     var selectedNodeIDs: Set<DiagramNode.ID>
     var selectedEdgeID: DiagramEdge.ID?

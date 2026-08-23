@@ -644,3 +644,14 @@ struct BoardDocument: Equatable, Codable {
     var schemaVersion = BoardDocument.currentSchemaVersion
     var board: Board
 }
+
+enum BoardDocumentError: LocalizedError {
+    case unsupportedSchemaVersion(found: Int, supported: Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedSchemaVersion(let found, let supported):
+            "This board uses document format version \(found), but this version of InfraCanvas supports up to version \(supported). Update InfraCanvas to open it safely."
+        }
+    }
+}

@@ -852,6 +852,33 @@ final class BoardStoreTests: XCTestCase {
         XCTAssertTrue(store.canUndo)
     }
 
+    func testUndoTracksDirtyStateRelativeToLastSavedBoard() throws {
+        let store = BoardStore(board: Board(name: "Test", nodes: [], edges: []))
+        let url = temporaryBoardURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        store.addNode(from: ComponentTemplate.defaultTemplate)
+        try store.save(to: url)
+        let savedBoard = store.board
+
+        XCTAssertFalse(store.isDirty)
+
+        store.addNode(from: ComponentTemplate.defaultTemplate)
+        XCTAssertTrue(store.isDirty)
+
+        store.undo()
+        XCTAssertEqual(store.board, savedBoard)
+        XCTAssertFalse(store.isDirty)
+
+        store.undo()
+        XCTAssertNotEqual(store.board, savedBoard)
+        XCTAssertTrue(store.isDirty)
+
+        store.redo()
+        XCTAssertEqual(store.board, savedBoard)
+        XCTAssertFalse(store.isDirty)
+    }
+
     func testSavingAndLoadingBoardFile() throws {
         let source = testNode(title: "Source")
         let target = testNode(title: "Target", x: 220)
@@ -887,6 +914,25 @@ final class BoardStoreTests: XCTestCase {
         XCTAssertEqual(store.board.name, "Home Network")
         XCTAssertEqual(loadedStore.board.name, "Home Network")
         XCTAssertEqual(store.documentTitle, "Home Network")
+    }
+
+    func testFailedSaveAsDoesNotChangeBoardNameOrDirtyState() {
+        let node = testNode(title: "Original Node")
+        let board = Board(name: "Original Name", nodes: [node], edges: [])
+        let store = BoardStore(board: board)
+        let missingDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("InfraCanvas-Missing-\(UUID().uuidString)", isDirectory: true)
+        let url = missingDirectory.appendingPathComponent("Renamed Board.infracanvas")
+
+        store.selectNode(node.id)
+        store.updateSelectedNode(title: "Unsaved Node")
+        XCTAssertTrue(store.isDirty)
+
+        XCTAssertThrowsError(try store.save(to: url, updatingBoardNameFromURL: true))
+        XCTAssertEqual(store.board.name, "Original Name")
+        XCTAssertEqual(store.board.nodes.first?.title, "Unsaved Node")
+        XCTAssertTrue(store.isDirty)
+        XCTAssertNil(store.fileURL)
     }
 
     func testOpeningBoardFromDocumentURLLoadsFile() throws {
@@ -1147,6 +1193,39 @@ final class BoardStoreTests: XCTestCase {
 
         XCTAssertEqual(store.board.nodes.first?.id, nodeID)
         XCTAssertEqual(store.board.nodes.first?.notes, "")
+    }
+
+    func testLoadingFutureSchemaVersionIsRejectedWithoutChangingCurrentBoard() throws {
+        let originalNode = testNode(title: "Current")
+        let store = BoardStore(board: Board(name: "Current Board", nodes: [originalNode], edges: []))
+        store.selectNode(originalNode.id)
+        store.updateSelectedNode(title: "Unsaved Current")
+        let originalBoard = store.board
+        let url = temporaryBoardURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let futureDocument = BoardDocument(
+            schemaVersion: BoardDocument.currentSchemaVersion + 1,
+            board: Board(name: "Future Board", nodes: [], edges: [])
+        )
+        try JSONEncoder().encode(futureDocument).write(to: url)
+
+        XCTAssertThrowsError(try store.load(from: url)) { error in
+            guard let documentError = error as? BoardDocumentError else {
+                return XCTFail("Expected BoardDocumentError, received \(error)")
+            }
+
+            switch documentError {
+            case .unsupportedSchemaVersion(let found, let supported):
+                XCTAssertEqual(found, BoardDocument.currentSchemaVersion + 1)
+                XCTAssertEqual(supported, BoardDocument.currentSchemaVersion)
+            }
+        }
+        XCTAssertEqual(store.board, originalBoard)
+        XCTAssertNil(store.fileURL)
+        XCTAssertTrue(store.isDirty)
+        XCTAssertTrue(store.canUndo)
+        XCTAssertEqual(store.selectedNodeID, originalNode.id)
     }
 
     func testExportRendererFramesBoardContent() {

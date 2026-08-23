@@ -136,6 +136,35 @@ final class ConnectorRoutingTests: XCTestCase {
         )
     }
 
+    func testOrthogonalRouteValidatesObstaclesBeyondPerformanceLimit() {
+        let source = CGRect(x: 0, y: 0, width: 100, height: 80)
+        let target = CGRect(x: 1200, y: 0, width: 100, height: 80)
+        let tallObstacle = CGRect(x: 130, y: -300, width: 30, height: 600)
+        let middleObstacles = (0..<10).map { index in
+            CGRect(x: 340 + CGFloat(index) * 55, y: -20, width: 30, height: 120)
+        }
+        let obstacles = [tallObstacle] + middleObstacles
+
+        let route = ConnectorRouter.route(
+            style: .orthogonal,
+            sourceRect: source,
+            targetRect: target,
+            obstacleRects: obstacles,
+            options: testOptions
+        )
+
+        for obstacle in obstacles {
+            let paddedObstacle = obstacle.insetBy(
+                dx: -testOptions.obstaclePadding,
+                dy: -testOptions.obstaclePadding
+            )
+            XCTAssertFalse(
+                route.segments.contains { segmentIntersects($0, paddedObstacle) },
+                "Route intersects obstacle \(obstacle)"
+            )
+        }
+    }
+
     private var testOptions: ConnectorRoutingOptions {
         ConnectorRoutingOptions(
             obstaclePadding: 8,

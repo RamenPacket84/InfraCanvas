@@ -8,6 +8,36 @@
       name="description"
       content="InfraCanvas is an open-source macOS canvas for mapping infrastructure, networks, systems, and connected ideas."
     />
+    <link rel="canonical" href="https://infra-canvas.com/" />
+    <meta name="theme-color" content="#0b100e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="InfraCanvas" />
+    <meta property="og:title" content="InfraCanvas" />
+    <meta
+      property="og:description"
+      content="InfraCanvas is an open-source macOS canvas for mapping infrastructure, networks, systems, and connected ideas."
+    />
+    <meta property="og:url" content="https://infra-canvas.com/" />
+    <meta
+      property="og:image"
+      content="https://infra-canvas.com/assets/screenshot1.png"
+    />
+    <meta property="og:image:width" content="1600" />
+    <meta property="og:image:height" content="938" />
+    <meta
+      property="og:image:alt"
+      content="Sample InfraCanvas board of a fictional Clearbrook Water Works treatment plant"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="InfraCanvas" />
+    <meta
+      name="twitter:description"
+      content="InfraCanvas is an open-source macOS canvas for mapping infrastructure, networks, systems, and connected ideas."
+    />
+    <meta
+      name="twitter:image"
+      content="https://infra-canvas.com/assets/screenshot1.png"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,7 +46,7 @@
     />
     <link rel="icon" type="image/png" href="assets/infracanvas-icon.png" />
     <link rel="apple-touch-icon" href="assets/infracanvas-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=20260711-2" />
+    <link rel="stylesheet" href="styles.css?v=20260922-3" />
   </head>
   <body>
     <header class="site-header">
@@ -38,26 +68,31 @@
           <p class="label">Open-source macOS diagramming</p>
           <h1>InfraCanvas</h1>
           <p class="summary">
-            Open-source and local-first, InfraCanvas helps map infrastructure,
-            networks, systems, dependencies, and connected ideas.
+            Local-first, InfraCanvas helps map infrastructure, networks,
+            systems, dependencies, and connected ideas.
           </p>
           <div class="actions">
             <a
               class="button primary"
               href="https://github.com/RamenPacket84/InfraCanvas/releases/download/v0.2.1/InfraCanvas-0.2.1.dmg"
             >
-              Download DMG
+              Download for macOS
             </a>
             <a class="button" href="https://github.com/RamenPacket84/InfraCanvas">
               Source on GitHub
             </a>
           </div>
+          <p class="release-note">
+            <a href="https://github.com/RamenPacket84/InfraCanvas/releases/tag/v0.2.1">0.2.1</a>
+            improves undo/redo and Save As, and routes elbow connectors more
+            cleanly in dense diagrams.
+          </p>
         </div>
 
         <dl class="release-card" aria-label="Release details">
           <div>
             <dt>Current version</dt>
-            <dd>0.2.0</dd>
+            <dd>0.2.1</dd>
           </div>
           <div>
             <dt>Requires</dt>
@@ -74,26 +109,6 @@
         </dl>
       </section>
 
-      <section class="screenshot-stack" aria-label="InfraCanvas screenshots">
-        <figure class="screenshot">
-          <img
-            src="assets/infracanvas-dark.png"
-            alt="InfraCanvas in dark mode showing an infrastructure diagram with connected components"
-            width="2890"
-            height="1782"
-          />
-        </figure>
-
-        <figure class="screenshot">
-          <img
-            src="assets/infracanvas-dark2.png"
-            alt="InfraCanvas in dark mode with a connector context menu open"
-            width="2048"
-            height="1280"
-          />
-        </figure>
-      </section>
-
       <section class="statement" id="overview">
         <p>
           InfraCanvas is built for people who need to reason through systems:
@@ -101,6 +116,68 @@
           dependencies, handoffs, and the operational details that are easier to
           understand when the pieces are visible.
         </p>
+      </section>
+
+      <section class="screenshot-stack" aria-label="InfraCanvas screenshots">
+        <figure class="screenshot">
+          <picture>
+            <source type="image/webp" srcset="assets/screenshot1.webp" />
+            <img
+              src="assets/screenshot1.png"
+              alt="Sample InfraCanvas board of a fictional Clearbrook Water Works treatment plant, with grouped source-water components"
+              width="1600"
+              height="938"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </picture>
+          <figcaption>Example: Clearbrook Water Works</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+          <picture>
+            <source type="image/webp" srcset="assets/screenshot2.webp" />
+            <img
+              src="assets/screenshot2.png"
+              alt="InfraCanvas showing a macOS system overview diagram from hardware through Darwin, frameworks, and apps"
+              width="1600"
+              height="942"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+          <figcaption>macOS system overview</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+          <picture>
+            <source type="image/webp" srcset="assets/infracanvas-dark.webp" />
+            <img
+              src="assets/infracanvas-dark.png"
+              alt="InfraCanvas in dark mode showing an infrastructure diagram with connected components"
+              width="1600"
+              height="987"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+          <figcaption>Home network</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+          <picture>
+            <source type="image/webp" srcset="assets/infracanvas-dark2.webp" />
+            <img
+              src="assets/infracanvas-dark2.png"
+              alt="InfraCanvas in dark mode with a connector context menu open"
+              width="1600"
+              height="1002"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+          <figcaption>Connector menu</figcaption>
+        </figure>
       </section>
 
       <section class="content-list" aria-label="InfraCanvas capabilities">
@@ -141,8 +218,6 @@
           <li>macOS 14.0 or later</li>
           <li>No separate SF Symbols installation required</li>
           <li>Automatic fallback icons when a symbol is unavailable</li>
-          <li>Developer ID signed and Apple-notarized for normal Gatekeeper checks</li>
-          <li>DMG distributed through GitHub Releases</li>
         </ul>
       </section>
 

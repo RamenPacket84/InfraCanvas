@@ -19,6 +19,18 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 7.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 body {
@@ -180,6 +192,23 @@ li {
   margin-top: 1.6rem;
 }
 
+.release-note {
+  max-width: 48ch;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.release-note a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+.release-note a:hover {
+  color: var(--text);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -195,6 +224,16 @@ li {
 .button.primary {
   border-color: color-mix(in srgb, var(--accent) 44%, var(--line));
   background: var(--accent-soft);
+}
+
+.button:hover {
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--line));
+  background: var(--accent-soft);
+}
+
+.button.primary:hover {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface));
 }
 
 .release-card {
@@ -233,8 +272,9 @@ li {
 
 .screenshot-stack {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-top: 2.5rem;
+  margin-top: 1.5rem;
   padding-bottom: 2.5rem;
   border-bottom: 1px solid var(--line);
 }
@@ -243,15 +283,30 @@ li {
   margin: 0;
 }
 
+.screenshot picture,
 .screenshot img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.screenshot img {
   border: 1px solid var(--line);
   background: var(--surface-soft);
 }
 
-.statement,
+.screenshot figcaption {
+  margin-top: 0.55rem;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-style: normal;
+}
+
+.statement {
+  padding: 3rem 0 0;
+}
+
 .content-list,
 .split-section,
 .trust-note {
@@ -365,6 +420,10 @@ li {
   .hero {
     gap: 1.5rem;
     padding-top: 3rem;
+  }
+
+  .screenshot-stack {
+    grid-template-columns: 1fr;
   }
 
   .release-card div {

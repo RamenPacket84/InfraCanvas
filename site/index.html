@@ -46,7 +46,7 @@
     />
     <link rel="icon" type="image/png" href="assets/infracanvas-icon.png" />
     <link rel="apple-touch-icon" href="assets/infracanvas-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=20260922-3" />
+    <link rel="stylesheet" href="styles.css?v=20260923-2" />
   </head>
   <body>
     <header class="site-header">
@@ -120,62 +120,94 @@
 
       <section class="screenshot-stack" aria-label="InfraCanvas screenshots">
         <figure class="screenshot">
-          <picture>
-            <source type="image/webp" srcset="assets/screenshot1.webp" />
-            <img
-              src="assets/screenshot1.png"
-              alt="Sample InfraCanvas board of a fictional Clearbrook Water Works treatment plant, with grouped source-water components"
-              width="1600"
-              height="938"
-              fetchpriority="high"
-              decoding="async"
-            />
-          </picture>
+          <a
+            class="screenshot-open"
+            href="assets/screenshot1.png"
+            data-webp="assets/screenshot1.webp"
+            data-width="1600"
+            data-height="938"
+          >
+            <picture>
+              <source type="image/webp" srcset="assets/screenshot1.webp" />
+              <img
+                src="assets/screenshot1.png"
+                alt="Sample InfraCanvas board of a fictional Clearbrook Water Works treatment plant, with grouped source-water components"
+                width="1600"
+                height="938"
+                fetchpriority="high"
+                decoding="async"
+              />
+            </picture>
+          </a>
           <figcaption>Example: Clearbrook Water Works</figcaption>
         </figure>
 
         <figure class="screenshot">
-          <picture>
-            <source type="image/webp" srcset="assets/screenshot2.webp" />
-            <img
-              src="assets/screenshot2.png"
-              alt="InfraCanvas showing a macOS system overview diagram from hardware through Darwin, frameworks, and apps"
-              width="1600"
-              height="942"
-              loading="lazy"
-              decoding="async"
-            />
-          </picture>
+          <a
+            class="screenshot-open"
+            href="assets/screenshot2.png"
+            data-webp="assets/screenshot2.webp"
+            data-width="1600"
+            data-height="942"
+          >
+            <picture>
+              <source type="image/webp" srcset="assets/screenshot2.webp" />
+              <img
+                src="assets/screenshot2.png"
+                alt="InfraCanvas showing a macOS system overview diagram from hardware through Darwin, frameworks, and apps"
+                width="1600"
+                height="942"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </a>
           <figcaption>macOS system overview</figcaption>
         </figure>
 
         <figure class="screenshot">
-          <picture>
-            <source type="image/webp" srcset="assets/infracanvas-dark.webp" />
-            <img
-              src="assets/infracanvas-dark.png"
-              alt="InfraCanvas in dark mode showing an infrastructure diagram with connected components"
-              width="1600"
-              height="987"
-              loading="lazy"
-              decoding="async"
-            />
-          </picture>
+          <a
+            class="screenshot-open"
+            href="assets/infracanvas-dark.png"
+            data-webp="assets/infracanvas-dark.webp"
+            data-width="1600"
+            data-height="987"
+          >
+            <picture>
+              <source type="image/webp" srcset="assets/infracanvas-dark.webp" />
+              <img
+                src="assets/infracanvas-dark.png"
+                alt="InfraCanvas in dark mode showing an infrastructure diagram with connected components"
+                width="1600"
+                height="987"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </a>
           <figcaption>Home network</figcaption>
         </figure>
 
         <figure class="screenshot">
-          <picture>
-            <source type="image/webp" srcset="assets/infracanvas-dark2.webp" />
-            <img
-              src="assets/infracanvas-dark2.png"
-              alt="InfraCanvas in dark mode with a connector context menu open"
-              width="1600"
-              height="1002"
-              loading="lazy"
-              decoding="async"
-            />
-          </picture>
+          <a
+            class="screenshot-open"
+            href="assets/infracanvas-dark2.png"
+            data-webp="assets/infracanvas-dark2.webp"
+            data-width="1600"
+            data-height="1002"
+          >
+            <picture>
+              <source type="image/webp" srcset="assets/infracanvas-dark2.webp" />
+              <img
+                src="assets/infracanvas-dark2.png"
+                alt="InfraCanvas in dark mode with a connector context menu open"
+                width="1600"
+                height="1002"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </a>
           <figcaption>Connector menu</figcaption>
         </figure>
       </section>
@@ -255,5 +287,19 @@
       <a href="https://github.com/RamenPacket84">GitHub</a>
       <a href="https://ramenpacket.com">ramenpacket.com</a>
     </footer>
+
+    <dialog class="lightbox" aria-labelledby="lightbox-caption">
+      <button type="button" class="button lightbox-close" aria-label="Close">
+        Close
+      </button>
+      <figure>
+        <picture>
+          <source type="image/webp" />
+          <img id="lightbox-image" alt="" width="1600" height="938" />
+        </picture>
+        <figcaption id="lightbox-caption"></figcaption>
+      </figure>
+    </dialog>
+    <script src="lightbox.js?v=20260923-1" defer></script>
   </body>
 </html>

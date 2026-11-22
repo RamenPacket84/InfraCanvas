@@ -38,6 +38,7 @@ final class BoardStore: ObservableObject {
     private var savedBoardSnapshot: Board
     private var undoStack: [BoardHistoryState] = []
     private var redoStack: [BoardHistoryState] = []
+    private var activeInspectorTextEdit: InspectorTextEdit?
     private var hasPresentedSymbolAvailabilityWarning = false
 
     init(board: Board = .blank) {
@@ -110,6 +111,7 @@ final class BoardStore: ObservableObject {
     }
 
     func undo() {
+        endInspectorTextEditing()
         guard let previousState = undoStack.popLast() else { return }
         redoStack.append(historySnapshot())
         trimHistoryStack(&redoStack)
@@ -118,6 +120,7 @@ final class BoardStore: ObservableObject {
     }
 
     func redo() {
+        endInspectorTextEditing()
         guard let nextState = redoStack.popLast() else { return }
         undoStack.append(historySnapshot())
         trimHistoryStack(&undoStack)
@@ -127,6 +130,10 @@ final class BoardStore: ObservableObject {
 
     func beginUndoableAction() {
         registerUndoSnapshot()
+    }
+
+    func endInspectorTextEditing() {
+        activeInspectorTextEdit = nil
     }
 
     func toggleBackgroundStyle() {
@@ -171,6 +178,7 @@ final class BoardStore: ObservableObject {
     }
 
     func selectNode(_ id: DiagramNode.ID?, activateSelectTool: Bool = true) {
+        endInspectorTextEditing()
         if let id {
             if let group = group(containing: id) {
                 selectGroup(group.id, activateSelectTool: activateSelectTool)
@@ -192,6 +200,7 @@ final class BoardStore: ObservableObject {
     }
 
     func selectNodes(_ ids: Set<DiagramNode.ID>, activateSelectTool: Bool = true) {
+        endInspectorTextEditing()
         selectedNodeIDs = ids
         selectedNodeID = primaryNodeID(in: ids)
         selectedEdgeID = nil
@@ -203,6 +212,7 @@ final class BoardStore: ObservableObject {
     }
 
     func toggleNodeSelection(_ id: DiagramNode.ID) {
+        endInspectorTextEditing()
         let toggledIDs = group(containing: id)?.nodeIDs ?? [id]
 
         if toggledIDs.isSubset(of: selectedNodeIDs) {
@@ -222,6 +232,7 @@ final class BoardStore: ObservableObject {
     }
 
     func selectGroup(_ id: DiagramGroup.ID?, activateSelectTool: Bool = true) {
+        endInspectorTextEditing()
         guard let id else {
             selectedGroupID = nil
             selectedNodeIDs = []
@@ -243,6 +254,7 @@ final class BoardStore: ObservableObject {
     }
 
     func selectEdge(_ id: DiagramEdge.ID?) {
+        endInspectorTextEditing()
         selectedEdgeID = id
         selectedNodeIDs = []
         selectedNodeID = nil
@@ -459,9 +471,9 @@ final class BoardStore: ObservableObject {
         case .right:
             moveNodes(selectedNodeIDs, byWorldDelta: CGSize(width: distance, height: 0))
         case .up:
-            moveNodes(selectedNodeIDs, byWorldDelta: CGSize(width: 0, height: -distance))
-        case .down:
             moveNodes(selectedNodeIDs, byWorldDelta: CGSize(width: 0, height: distance))
+        case .down:
+            moveNodes(selectedNodeIDs, byWorldDelta: CGSize(width: 0, height: -distance))
         }
     }
 
@@ -532,10 +544,10 @@ final class BoardStore: ObservableObject {
         }
     }
 
-    func updateSelectedNode(title: String? = nil, subtitle: String? = nil, notes: String? = nil, symbolName: String? = nil, tint: NodeTint? = nil) {
+    func updateSelectedNode(title: String? = nil, subtitle: String? = nil, notes: String? = nil, symbolName: String? = nil, tint: NodeTint? = nil, inspectorTextEdit: InspectorTextEdit? = nil) {
         guard let selectedNodeID, let index = board.nodes.firstIndex(where: { $0.id == selectedNodeID }) else { return }
 
-        updateNode(at: index, title: title, subtitle: subtitle, notes: notes, symbolName: symbolName, tint: tint, registerUndo: true)
+        updateNode(at: index, title: title, subtitle: subtitle, notes: notes, symbolName: symbolName, tint: tint, registerUndo: true, inspectorTextEdit: inspectorTextEdit)
     }
 
     func updateNode(_ id: DiagramNode.ID, title: String? = nil, subtitle: String? = nil, notes: String? = nil, symbolName: String? = nil, tint: NodeTint? = nil) {
@@ -554,11 +566,16 @@ final class BoardStore: ObservableObject {
         }
     }
 
-    private func updateNode(at index: Array<DiagramNode>.Index, title: String? = nil, subtitle: String? = nil, notes: String? = nil, symbolName: String? = nil, tint: NodeTint? = nil, registerUndo: Bool = false) {
-        guard title != nil || subtitle != nil || notes != nil || symbolName != nil || tint != nil else { return }
+    private func updateNode(at index: Array<DiagramNode>.Index, title: String? = nil, subtitle: String? = nil, notes: String? = nil, symbolName: String? = nil, tint: NodeTint? = nil, registerUndo: Bool = false, inspectorTextEdit: InspectorTextEdit? = nil) {
+        let node = board.nodes[index]
+        guard title.map({ $0 != node.title }) ?? false
+            || subtitle.map({ $0 != node.subtitle }) ?? false
+            || notes.map({ $0 != node.notes }) ?? false
+            || symbolName.map({ $0 != node.symbolName }) ?? false
+            || tint.map({ $0 != node.tint }) ?? false else { return }
 
         if registerUndo {
-            registerUndoSnapshot()
+            registerUndoSnapshot(for: inspectorTextEdit)
         }
 
         if let title {
@@ -587,10 +604,10 @@ final class BoardStore: ObservableObject {
         }
     }
 
-    func updateSelectedEdge(label: String? = nil, showsLabel: Bool? = nil, hasArrow: Bool? = nil, style: ConnectorStyle? = nil, kind: ConnectorKind? = nil) {
+    func updateSelectedEdge(label: String? = nil, showsLabel: Bool? = nil, hasArrow: Bool? = nil, style: ConnectorStyle? = nil, kind: ConnectorKind? = nil, inspectorTextEdit: InspectorTextEdit? = nil) {
         guard let selectedEdgeID, let index = board.edges.firstIndex(where: { $0.id == selectedEdgeID }) else { return }
 
-        updateEdge(at: index, label: label, showsLabel: showsLabel, hasArrow: hasArrow, style: style, kind: kind, registerUndo: true)
+        updateEdge(at: index, label: label, showsLabel: showsLabel, hasArrow: hasArrow, style: style, kind: kind, registerUndo: true, inspectorTextEdit: inspectorTextEdit)
     }
 
     func updateEdge(_ id: DiagramEdge.ID, label: String? = nil, showsLabel: Bool? = nil, hasArrow: Bool? = nil, style: ConnectorStyle? = nil, kind: ConnectorKind? = nil) {
@@ -656,15 +673,15 @@ final class BoardStore: ObservableObject {
         markDirty()
     }
 
-    func updateSelectedGroup(name: String) {
+    func updateSelectedGroup(name: String, inspectorTextEdit: InspectorTextEdit? = nil) {
         guard let selectedGroupID else { return }
-        updateGroup(selectedGroupID, name: name)
+        updateGroup(selectedGroupID, name: name, inspectorTextEdit: inspectorTextEdit)
     }
 
-    func updateGroup(_ id: DiagramGroup.ID, name: String) {
+    func updateGroup(_ id: DiagramGroup.ID, name: String, inspectorTextEdit: InspectorTextEdit? = nil) {
         guard let index = board.groups.firstIndex(where: { $0.id == id }) else { return }
         guard board.groups[index].name != name else { return }
-        registerUndoSnapshot()
+        registerUndoSnapshot(for: inspectorTextEdit)
 
         board.groups[index].name = name
         markDirty()
@@ -677,12 +694,18 @@ final class BoardStore: ObservableObject {
         hasArrow: Bool? = nil,
         style: ConnectorStyle? = nil,
         kind: ConnectorKind? = nil,
-        registerUndo: Bool = false
+        registerUndo: Bool = false,
+        inspectorTextEdit: InspectorTextEdit? = nil
     ) {
-        guard label != nil || showsLabel != nil || hasArrow != nil || style != nil || kind != nil else { return }
+        let edge = board.edges[index]
+        guard label.map({ $0 != edge.label }) ?? false
+            || showsLabel.map({ $0 != edge.showsLabel }) ?? false
+            || hasArrow.map({ $0 != edge.hasArrow }) ?? false
+            || style.map({ $0 != edge.style }) ?? false
+            || kind.map({ $0 != edge.kind }) ?? false else { return }
 
         if registerUndo {
-            registerUndoSnapshot()
+            registerUndoSnapshot(for: inspectorTextEdit)
         }
 
         if let label {
@@ -1081,6 +1104,7 @@ final class BoardStore: ObservableObject {
         board = boardToSave
         savedBoardSnapshot = boardToSave
         fileURL = targetURL
+        endInspectorTextEditing()
         refreshDirtyState()
         lastFileError = nil
     }
@@ -1156,7 +1180,9 @@ final class BoardStore: ObservableObject {
         refreshDirtyState()
     }
 
-    private func registerUndoSnapshot() {
+    private func registerUndoSnapshot(for inspectorTextEdit: InspectorTextEdit? = nil) {
+        if let inspectorTextEdit, activeInspectorTextEdit == inspectorTextEdit { return }
+        activeInspectorTextEdit = inspectorTextEdit
         let snapshot = historySnapshot()
         guard undoStack.last != snapshot else { return }
 
@@ -1167,6 +1193,7 @@ final class BoardStore: ObservableObject {
     }
 
     private func clearHistory() {
+        endInspectorTextEditing()
         undoStack.removeAll()
         redoStack.removeAll()
         updateHistoryAvailability()
@@ -1461,6 +1488,19 @@ final class BoardStore: ObservableObject {
         alert.messageText = "InfraCanvas could not complete the file operation."
         alert.runModal()
     }
+}
+
+enum InspectorTextEdit: Hashable {
+    enum NodeField: Hashable {
+        case title
+        case subtitle
+        case symbolName
+        case notes
+    }
+
+    case node(DiagramNode.ID, NodeField)
+    case edgeLabel(DiagramEdge.ID)
+    case groupName(DiagramGroup.ID)
 }
 
 enum NodeAlignment {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct InspectorView: View {
     @EnvironmentObject private var boardStore: BoardStore
+    @FocusState private var focusedTextEdit: InspectorTextEdit?
 
     var body: some View {
         Form {
@@ -11,9 +12,10 @@ struct InspectorView: View {
                         "Name",
                         text: Binding(
                             get: { group.name },
-                            set: { boardStore.updateSelectedGroup(name: $0) }
+                            set: { boardStore.updateSelectedGroup(name: $0, inspectorTextEdit: .groupName(group.id)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .groupName(group.id))
 
                     LabeledContent("Components", value: group.nodeIDs.count.formatted())
                 }
@@ -33,34 +35,38 @@ struct InspectorView: View {
                         "Title",
                         text: Binding(
                             get: { node.title },
-                            set: { boardStore.updateSelectedNode(title: $0) }
+                            set: { boardStore.updateSelectedNode(title: $0, inspectorTextEdit: .node(node.id, .title)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .node(node.id, .title))
 
                     TextField(
                         "Subtitle",
                         text: Binding(
                             get: { node.subtitle },
-                            set: { boardStore.updateSelectedNode(subtitle: $0) }
+                            set: { boardStore.updateSelectedNode(subtitle: $0, inspectorTextEdit: .node(node.id, .subtitle)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .node(node.id, .subtitle))
 
                     TextField(
                         "SF Symbol",
                         text: Binding(
                             get: { node.symbolName },
-                            set: { boardStore.updateSelectedNode(symbolName: $0) }
+                            set: { boardStore.updateSelectedNode(symbolName: $0, inspectorTextEdit: .node(node.id, .symbolName)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .node(node.id, .symbolName))
                 }
 
                 Section("Notes") {
                     TextEditor(
                         text: Binding(
                             get: { node.notes },
-                            set: { boardStore.updateSelectedNode(notes: $0) }
+                            set: { boardStore.updateSelectedNode(notes: $0, inspectorTextEdit: .node(node.id, .notes)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .node(node.id, .notes))
                     .font(.body)
                     .frame(minHeight: 110)
                 }
@@ -101,9 +107,10 @@ struct InspectorView: View {
                         "Label",
                         text: Binding(
                             get: { edge.label },
-                            set: { boardStore.updateSelectedEdge(label: $0) }
+                            set: { boardStore.updateSelectedEdge(label: $0, inspectorTextEdit: .edgeLabel(edge.id)) }
                         )
                     )
+                    .focused($focusedTextEdit, equals: .edgeLabel(edge.id))
 
                     Toggle(
                         "Show Label",
@@ -166,6 +173,12 @@ struct InspectorView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Inspector")
+        .onChange(of: focusedTextEdit) { _, _ in
+            boardStore.endInspectorTextEditing()
+        }
+        .onDisappear {
+            boardStore.endInspectorTextEditing()
+        }
     }
 
     private var emptyStateDescription: String {

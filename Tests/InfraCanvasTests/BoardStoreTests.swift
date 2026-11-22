@@ -212,7 +212,63 @@ final class BoardStoreTests: XCTestCase {
         store.nudgeSelection(.down)
 
         XCTAssertEqual(store.board.nodes[0].x, 11)
-        XCTAssertEqual(store.board.nodes[0].y, 52)
+        XCTAssertEqual(store.board.nodes[0].y, -12)
+
+        store.nudgeSelection(.up)
+        XCTAssertEqual(store.board.nodes[0].y, 20)
+    }
+
+    func testInspectorTypingPreservesEarlierUndoHistory() {
+        let node = testNode(title: "Node", x: 10, y: 20)
+        let store = BoardStore(board: Board(name: "Test", nodes: [node], edges: []))
+        store.selectNode(node.id)
+        store.moveNodes([node.id], byWorldDelta: CGSize(width: 32, height: 0))
+
+        for count in 1...150 {
+            store.updateSelectedNode(
+                notes: String(repeating: "x", count: count),
+                inspectorTextEdit: .node(node.id, .notes)
+            )
+        }
+
+        store.undo()
+        XCTAssertEqual(store.board.nodes[0].notes, "")
+        XCTAssertEqual(store.board.nodes[0].x, 42)
+
+        store.undo()
+        XCTAssertEqual(store.board.nodes[0].x, 10)
+    }
+
+    func testInspectorTextEditsSplitWhenFocusEnds() {
+        let node = testNode(title: "Node")
+        let store = BoardStore(board: Board(name: "Test", nodes: [node], edges: []))
+        store.selectNode(node.id)
+
+        store.updateSelectedNode(title: "First", inspectorTextEdit: .node(node.id, .title))
+        store.updateSelectedNode(title: "First edit", inspectorTextEdit: .node(node.id, .title))
+        store.endInspectorTextEditing()
+        store.updateSelectedNode(title: "Second edit", inspectorTextEdit: .node(node.id, .title))
+
+        store.undo()
+        XCTAssertEqual(store.board.nodes[0].title, "First edit")
+        store.undo()
+        XCTAssertEqual(store.board.nodes[0].title, "Node")
+    }
+
+    func testSavingSplitsInspectorTextUndoAction() throws {
+        let node = testNode(title: "Node")
+        let store = BoardStore(board: Board(name: "Test", nodes: [node], edges: []))
+        let url = temporaryBoardURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+        store.selectNode(node.id)
+
+        store.updateSelectedNode(title: "Before save", inspectorTextEdit: .node(node.id, .title))
+        try store.save(to: url)
+        store.updateSelectedNode(title: "After save", inspectorTextEdit: .node(node.id, .title))
+
+        store.undo()
+        XCTAssertEqual(store.board.nodes[0].title, "Before save")
+        XCTAssertFalse(store.isDirty)
     }
 
     func testLayerOrderingMovesSelectedNodes() {

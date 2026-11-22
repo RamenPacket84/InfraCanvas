@@ -4,7 +4,6 @@ import SwiftUI
 @main
 struct InfraCanvasApp: App {
     @NSApplicationDelegateAdaptor(AppLifecycleDelegate.self) private var appDelegate
-    @StateObject private var boardStore = BoardStore()
 
     init() {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "missing bundle identifier"
@@ -13,18 +12,41 @@ struct InfraCanvasApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(boardStore)
-                .frame(minWidth: 1080, minHeight: 720)
-                .onAppear {
-                    appDelegate.boardStore = boardStore
-                }
-                .onOpenURL { url in
-                    boardStore.openBoard(from: url)
-                }
+            BoardWindowView(appDelegate: appDelegate)
         }
         .windowStyle(.titleBar)
         .commands {
+            BoardCommands()
+        }
+    }
+}
+
+private struct BoardWindowView: View {
+    let appDelegate: AppLifecycleDelegate
+    @StateObject private var boardStore = BoardStore()
+
+    var body: some View {
+        ContentView()
+            .environmentObject(boardStore)
+            .focusedSceneObject(boardStore)
+            .frame(minWidth: 1080, minHeight: 720)
+            .onAppear {
+                appDelegate.register(boardStore)
+            }
+            .onDisappear {
+                appDelegate.unregister(boardStore)
+            }
+            .onOpenURL { url in
+                boardStore.openBoard(from: url)
+            }
+    }
+}
+
+private struct BoardCommands: Commands {
+    @FocusedObject private var boardStore: BoardStore?
+
+    var body: some Commands {
+        if let boardStore {
             CommandGroup(replacing: .newItem) {
                 Button("New Board") {
                     boardStore.newBoard()
@@ -116,7 +138,10 @@ struct InfraCanvasApp: App {
                 .disabled(!boardStore.canConnectSelectedNodes)
 
                 Menu("Default Connector Type") {
-                    Picker("Default Connector Type", selection: $boardStore.activeConnectorKind) {
+                    Picker("Default Connector Type", selection: Binding(
+                        get: { boardStore.activeConnectorKind },
+                        set: { boardStore.activeConnectorKind = $0 }
+                    )) {
                         ForEach(ConnectorKind.allCases) { kind in
                             Label(kind.title, systemImage: kind.symbolName)
                                 .tag(kind)
@@ -240,11 +265,27 @@ struct InfraCanvasApp: App {
 
 @MainActor
 final class AppLifecycleDelegate: NSObject, NSApplicationDelegate {
-    weak var boardStore: BoardStore?
+    private struct WeakBoardStore {
+        weak var store: BoardStore?
+    }
+
+    private var boardStores: [WeakBoardStore] = []
+
+    func register(_ store: BoardStore) {
+        boardStores.removeAll { $0.store == nil }
+        guard !boardStores.contains(where: { $0.store === store }) else { return }
+        boardStores.append(WeakBoardStore(store: store))
+    }
+
+    func unregister(_ store: BoardStore) {
+        boardStores.removeAll { $0.store == nil || $0.store === store }
+    }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard boardStore?.confirmDiscardingUnsavedChangesIfNeeded() ?? true else {
-            return .terminateCancel
+        for store in boardStores.compactMap(\.store) {
+            guard store.confirmDiscardingUnsavedChangesIfNeeded() else {
+                return .terminateCancel
+            }
         }
 
         return .terminateNow
